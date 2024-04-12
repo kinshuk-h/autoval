@@ -1,0 +1,20 @@
+{
+    "meta": {
+        "root": "/home/kinshuk/projects/ds207-resources/assignment/SAPName_SRNo"
+    },
+    "files": {
+        "found": {
+            "src-tokenizer/tokenizer.pkl": "",
+            "tgt-tokenizer/tokenizer.pkl": "",
+            "rnn.enc-dec/model.pt": ""
+        },
+        "missing": {}
+    },
+    "code": {
+
+    },
+    "variables": {
+        "SRC_VOCAB_SIZE": "300",
+        "ATTEMPTED_BONUS": "True"
+    }
+}
