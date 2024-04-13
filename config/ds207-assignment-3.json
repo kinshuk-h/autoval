@@ -72,6 +72,26 @@
       "trainer_eval_step": 1,
       "trainer_implementation": 2
     },
+    "enc-dec-rnn": {
+        "model_functions_correctness": 3,
+        "model_functions_adherence": 3,
+        "model_logprobs": 2,
+        "model_greedy_generate": 2,
+        "model_training": 3,
+        "model_consistency": 6,
+        "model_performance": 1,
+        "model_quality_fixed_hyperparams": 10,
+        "model_quality_best_hyperparams": 10
+    },
+    "enc-dec-rnn-attn": {
+        "model_functions_correctness": 3,
+        "model_attentions": 2,
+        "model_training": 3,
+        "model_consistency": 6,
+        "model_performance": 1,
+        "model_quality_fixed_hyperparams": 10,
+        "model_quality_best_hyperparams": 10
+    },
     "decoding": {
       "attempted_bonus_decoding": 1,
       "decoding_correctness_beam": 5,
