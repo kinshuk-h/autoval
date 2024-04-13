@@ -85,7 +85,8 @@ def main():
 
     if action in ('stats', 'all'):
         statistics.AggregateStatisticsTask(
-            args.data_dir, context['marks_distribution']
+            args.data_dir, context['marks_distribution'],
+            students=args.students
         ).execute()
 
 if __name__ == "__main__":
