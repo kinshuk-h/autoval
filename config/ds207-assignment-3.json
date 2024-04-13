@@ -64,7 +64,8 @@
       "tokenizer_creation": 1,
       "tokenizer_behavior": 2,
       "tokenizer_functions": 4,
-      "tokenizer_consistency": 1
+      "tokenizer_consistency": 1,
+      "tokenizer_quality": 12
     },
     "training": {
       "trainer_make_dataloader": 1,
