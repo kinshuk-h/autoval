@@ -1,4 +1,5 @@
 import os
+import json
 
 import pandas
 # from matplotlib import pyplot
@@ -12,7 +13,7 @@ def flatten_keys(dict_obj: dict, prefix='', result=None):
     for key, value in dict_obj.items():
         if isinstance(value, dict):
             flatten_keys(value, f"{key}.", result)
-        else:
+        elif not isinstance(value, (list, tuple)):
             result[f"{prefix}{key}"] = value
     return result
 
@@ -92,6 +93,9 @@ class AggregateStatisticsTask(Task):
                         status_string = f"fail: {status_string}"
                     self.print("         ", f"{test_name:{tlen}}", f"({test_max_marks:2}):", status_string)
             self.print("    MARKS:", marks_awarded, "/", marks_total)
+            self.print("    OUTPUTS:")
+            output = json.dumps(student_data.deepget("outputs", {}), indent=4, ensure_ascii=False)
+            for line in output.split('\n'): self.print("   ", line)
 
     def describe_output_stats(self):
         self.print("Generating statistics for module outputs ...")
