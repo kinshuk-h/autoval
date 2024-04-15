@@ -273,9 +273,12 @@ class CodeBlockPreparationTask(task.Task):
                         eval_block, in_eval_block = [], False
                         for line in ifile:
                             code += line
-                            if regex.search(r"^## [=]{2,4} BEGIN EVALUATION PORTION$", line.rstrip()):
-                                in_eval_block = True
-                            elif regex.search(r"^## [=]{2,4} END EVALUATION PORTION$", line.rstrip()):
+                            if regex.search(r"^#+ [=]{2,4} BEGIN EVALUATION PORTION$", line.rstrip()):
+                                if not in_eval_block: in_eval_block = True
+                                else:
+                                    code_blocks.append(block_deindent(block_strip(eval_block)))
+                                    eval_block, in_eval_block = [], True
+                            elif regex.search(r"^#+ [=]{2,4} END EVALUATION PORTION$", line.rstrip()):
                                 code_blocks.append(block_deindent(block_strip(eval_block)))
                                 eval_block, in_eval_block = [], False
                             elif in_eval_block:
