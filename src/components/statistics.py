@@ -17,6 +17,15 @@ def flatten_keys(dict_obj: dict, prefix='', result=None):
             result[f"{prefix}{key}"] = value
     return result
 
+def filter_lists(dict_obj):
+    new_dict = {}
+    for key, value in dict_obj.items():
+        if isinstance(value, dict):
+            new_dict[key] = filter_lists(value)
+        elif not isinstance(value, (list, tuple)):
+            new_dict[key] = value
+    return new_dict
+
 class AggregateStatisticsTask(Task):
     def __init__(self, data_dir, marks_distribution, students=None) -> None:
         super().__init__("STATS", [
@@ -94,7 +103,7 @@ class AggregateStatisticsTask(Task):
                     self.print("         ", f"{test_name:{tlen}}", f"({test_max_marks:2}):", status_string)
             self.print("    MARKS:", marks_awarded, "/", marks_total)
             self.print("    OUTPUTS:")
-            output = json.dumps(student_data.deepget("outputs", {}), indent=4, ensure_ascii=False)
+            output = json.dumps(filter_lists(student_data.deepget("outputs", {})), indent=4, ensure_ascii=False)
             for line in output.split('\n'): self.print("   ", line)
 
     def describe_output_stats(self):
