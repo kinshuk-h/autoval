@@ -6,7 +6,9 @@
         "found": {
             "src-tokenizer/tokenizer.pkl": "",
             "tgt-tokenizer/tokenizer.pkl": "",
-            "rnn.enc-dec/model.pt": ""
+            "rnn.enc-dec/model.pt": "",
+            "rnn.enc-dec/outputs.csv": "",
+            "rnn.enc-dec/loss.json": ""
         },
         "missing": {}
     },
