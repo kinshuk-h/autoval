@@ -3,6 +3,7 @@ import unicodedata
 
 import torch
 import pandas as pd
+import tqdm.auto as tqdm
 
 from nltk.translate import bleu_score
 
@@ -220,7 +221,7 @@ class Evaluator:
         # Generate outputs.
         generated_outputs = []
         with torch.no_grad():
-            for seq_x in data:
+            for seq_x in tqdm.tqdm(data):
                 generated_outputs.append(self.decoding_method(
                     model, seq_x, self.src_tokenizer,
                     self.tgt_tokenizer, **decoding_kwargs
