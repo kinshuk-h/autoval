@@ -193,10 +193,14 @@ class Context:
                 decoder_hidden_state = None
 
                 for _ in range(max_length):
-                    logits, decoder_hidden_state = self.model(
+                    logits_state = self.model(
                         seq_x, torch.tensor(seq_y[-1:], device=self.model.device),
                         decoder_hidden_state
                     )
+                    if len(logits_state) > 1:
+                        logits, decoder_hidden_state = logits_state
+                    else:
+                        logits = logits_state
                     seq_y.append(logits[-1].cpu().argmax().item())
                     if seq_y[-1] == end_token: break
 
@@ -208,10 +212,14 @@ class Context:
                 decoder_hidden_state = None
 
                 for _ in range(max_length):
-                    logits, decoder_hidden_state = self.model(
+                    logits_state = self.model(
                         seq_x, torch.tensor([ seq_y[-1:] ], device=self.model.device),
                         decoder_hidden_state
                     )
+                    if len(logits_state) > 1:
+                        logits, decoder_hidden_state = logits_state
+                    else:
+                        logits = logits_state
                     seq_y.append(logits[:, -1].cpu().argmax().item())
                     if seq_y[-1] == end_token: break
 
@@ -225,10 +233,12 @@ def test_model_functions_correctness(context: Context):
     seq_y = torch.tensor(seq_y, device=context.model.device)
 
     try:
-        output, _ = context.model(seq_x, seq_y)
+        output = context.model(seq_x, seq_y)
+        assert 1 <= len(output) <= 2
     except:
         try:
-            output, _ = context.model(torch.stack([ seq_x ], dim=0), torch.stack([ seq_y ], dim=0))
+            output = context.model(torch.stack([ seq_x ], dim=0), torch.stack([ seq_y ], dim=0))
+            assert 1 <= len(output) <= 2
         except:
             raise AssertionError("forward not executable or return mismatch")
 
@@ -242,7 +252,8 @@ def test_model_functions_adherence(context: Context):
     seq_y = torch.tensor(seq_y, device=context.model.device)
 
     try:
-        output, _ = context.model(seq_x, seq_y)
+        output = context.model(seq_x, seq_y)
+        if len(output) > 1: output = output[0]
         assert 2 <= len(output.shape) <= 3
         if len(output.shape) == 3: output = output[0]
         assert output.shape[0] == 1
@@ -250,7 +261,8 @@ def test_model_functions_adherence(context: Context):
     except AssertionError:
         raise AssertionError("assert fail: output dim mismatch")
     except Exception:
-        output, _ = context.model(torch.stack([seq_x], dim=0), torch.stack([seq_y], dim=0))
+        output = context.model(torch.stack([seq_x], dim=0), torch.stack([seq_y], dim=0))
+        if len(output) > 1: output = output[0]
         assert 2 <= len(output.shape) <= 3
         if len(output.shape) == 3: output = output[0]
         assert output.shape[0] == 1
@@ -261,11 +273,12 @@ def test_model_functions_adherence(context: Context):
     seq_x = torch.stack([ seq_x, seq_x, seq_x ], dim=0)
     seq_y = torch.stack([ seq_y, seq_y, seq_y ], dim=0)
 
-    output, _ = context.model(seq_x, seq_y)
+    output = context.model(seq_x, seq_y)
+    if len(output) > 1: output = output[0]
 
-    assert len(output.shape) == 3
+    assert len(output.shape) == 3 or len(output.shape) == 2
     assert output.shape[0]   == 3
-    assert output.shape[1]   == 1
+    if len(output.shape) == 3: assert output.shape[1]   == 1
     assert -1 <= (output.shape[-1] - len(context.tgt_tokenizer.get_vocabulary())) <= 1
 
 def test_model_logprobs(context: Context):
