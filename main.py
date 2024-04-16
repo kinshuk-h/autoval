@@ -40,7 +40,11 @@ def make_parser():
 
     stats_parser = subparsers.add_parser("stats", help="compiles test results and creates marks statistics")
 
-    return parser, [ extract_parser, code_parser, test_parser, stats_parser ]
+    plag_parser = subparsers.add_parser("plag", help="compares code outputs and results for possible plagarism")
+    plag_parser.add_argument("-b", "--base-file", default="templates/unique_code.py",
+                             help="base file to use as reference for student code (with MOSS)")
+
+    return parser, [ extract_parser, code_parser, test_parser, stats_parser, plag_parser ]
 
 def main():
     parser, subparsers = make_parser()
@@ -87,6 +91,12 @@ def main():
         statistics.AggregateStatisticsTask(
             args.data_dir, context['marks_distribution'],
             students=args.students
+        ).execute()
+
+    if action in ('plag', 'all'):
+        plagiarism.CheckSimilarityTask(
+            args.data_dir, args.base_file,
+            args.skip_existing
         ).execute()
 
 if __name__ == "__main__":
