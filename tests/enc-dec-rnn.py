@@ -178,7 +178,6 @@ class Context:
             try:
                 return self.model.log_probability(seq_x, seq_y)
             except:
-                print(torch.stack([ seq_x ], dim=0).shape)
                 return self.model.log_probability(torch.stack([ seq_x ], dim=0), torch.stack([ seq_y ], dim=0))
 
     def greedy_generate(self, seq_x, max_length):
@@ -250,7 +249,7 @@ def test_model_functions_adherence(context: Context):
     except AssertionError:
         raise AssertionError("assert fail: output dim mismatch")
     except Exception:
-        output, _ = context.model(torch.cat([seq_x], dim=0), torch.cat([seq_y], dim=0))
+        output, _ = context.model(torch.stack([seq_x], dim=0), torch.stack([seq_y], dim=0))
         assert 2 <= len(output.shape) <= 3
         if len(output.shape) == 3: output = output[0]
         assert output.shape[0] == 1
