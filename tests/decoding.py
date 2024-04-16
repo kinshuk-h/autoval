@@ -41,7 +41,8 @@ class Context:
 
         self.src_tokenizer, self.tgt_tokenizer = load_tokenizers(
             os.path.join(root, "src-tokenizer"),
-            os.path.join(root, "tgt-tokenizer")
+            os.path.join(root, "tgt-tokenizer"),
+            self.train_data, self.validation_data
         )
 
         try:

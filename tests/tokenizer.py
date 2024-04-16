@@ -736,8 +736,9 @@ class Context:
 
             src, tgt = init_tokenizers(
                 False,
-                os.path.join(root, "src-tokenizer"),
-                os.path.join(root, "tgt-tokenizer")
+                train_data=self.train_data, validation_data=self.validation_data,
+                src_file=os.path.join(root, "src-tokenizer"),
+                tgt_file=os.path.join(root, "tgt-tokenizer")
             )
 
         self.src_tokenizer, self.tgt_tokenizer = src, tgt
