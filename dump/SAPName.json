@@ -8,7 +8,10 @@
             "tgt-tokenizer/tokenizer.pkl": "",
             "rnn.enc-dec/model.pt": "",
             "rnn.enc-dec/outputs.csv": "",
-            "rnn.enc-dec/loss.json": ""
+            "rnn.enc-dec/loss.json": "",
+            "rnn.enc-dec.attn/model.pt": "",
+            "rnn.enc-dec.attn/outputs.csv": "",
+            "rnn.enc-dec.attn/loss.json": ""
         },
         "missing": {}
     },
