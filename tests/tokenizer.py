@@ -455,7 +455,8 @@ def rnn_greedy_generate(model, seq_x, src_tokenizer, tgt_tokenizer, max_length):
 
     with torch.no_grad():
         seq_x = torch.tensor(src_tokenizer.encode(seq_x)).to(model.device)
-        seq_y = [ src_tokenizer.special_tokens['[BOS]'] ]
+        seq_y = tgt_tokenizer.encode("आमिष", add_start=True, add_end=True)
+        seq_y, eos_token = seq_y[:1], seq_y[-1]
 
         decoder_hidden_state = None
 
@@ -465,7 +466,7 @@ def rnn_greedy_generate(model, seq_x, src_tokenizer, tgt_tokenizer, max_length):
                 decoder_hidden_state
             )
             seq_y.append(logits[-1].cpu().argmax().item())
-            if seq_y[-1] == tgt_tokenizer.special_tokens['[EOS]']: break
+            if seq_y[-1] == eos_token: break
 
         return tgt_tokenizer.decode(seq_y)
     pass
@@ -673,7 +674,7 @@ def get_tokenizer_performance(src_tokenizer, tgt_tokenizer, train_data, test_dat
     )
 
     rnn_enc_dec_training_params = dict(
-        num_epochs=6,
+        num_epochs=3,
         batch_size=16,
         shuffle=True,
         eval_steps=40000
@@ -870,30 +871,47 @@ def test_tokenizer_quality(context: Context):
 
     vocabulary = context.src_tokenizer.get_vocabulary()
     spl_tokens = context.src_tokenizer.get_special_tokens()
-    assert len(vocabulary) <= len(spl_tokens) + context.SRC_VOCAB_SIZE
+    if context.SRC_VOCAB_SIZE is not None:
+        assert len(vocabulary) <= len(spl_tokens) + context.SRC_VOCAB_SIZE
 
-    tok_impl_scores = get_tokenizer_performance(
-        context.src_tokenizer, context.tgt_tokenizer,
-        context.train_data, context.test_data.sample(n=256, random_state=20240401)
-    )
+    tok_length = len(context.tgt_tokenizer.encode("श्रीकृष्णकुमारचंदन", add_start=False, add_end=False))
+    assert tok_length < len("श्रीकृष्णकुमारचंदन") + 3, "tokenizer produces too many tokens"
 
-    ref_impl_scores = get_tokenizer_performance(
-        BPETokenizer(), BPETokenizer(),
-        context.train_data, context.test_data.sample(n=256, random_state=20240401)
-    )
+    tok_impl_scores = context.record.deepget("outputs.tokenizer.scores")
+
+    if tok_impl_scores is None:
+        tok_impl_scores = get_tokenizer_performance(
+            context.src_tokenizer, context.tgt_tokenizer,
+            context.train_data, context.test_data.sample(n=256, random_state=20240401, ignore_index=True)
+        )
+
+    # trained_src_tokenizer = BPETokenizer()
+    # trained_src_tokenizer.train(context.train_data['Name'], 1200)
+
+    # trained_tgt_tokenizer = BPETokenizer()
+    # trained_tgt_tokenizer.train(context.train_data['Translation'], 1200)
+
+    # ref_impl_scores = get_tokenizer_performance(
+    #     trained_src_tokenizer, trained_tgt_tokenizer,
+    #     context.train_data, context.test_data.sample(n=256, random_state=20240401, ignore_index=True)
+    # )
+
+    ref_impl_scores = {
+        "accuracy": 0.20,
+        "cer"     : 0.25,
+        "ter"     : 0.40,
+        "bleu"    : 0.55
+    }
 
     assert ref_impl_scores['bleu'] <= tok_impl_scores['bleu'], \
-        "assertion fail: tokenizer no good than uninitialized BPE!"
+        "assertion fail: tokenizer no good than overinitialized BPE!"
     assert ref_impl_scores['accuracy'] <= tok_impl_scores['accuracy'], \
-        "assertion fail: tokenizer no good than uninitialized BPE!"
+        "assertion fail: tokenizer no good than overinitialized BPE!"
     assert ref_impl_scores['cer'] >= tok_impl_scores['cer'], \
-        "assertion fail: tokenizer no good than uninitialized BPE!"
+        "assertion fail: tokenizer no good than overinitialized BPE!"
     assert ref_impl_scores['ter'] >= tok_impl_scores['ter'], \
-        "assertion fail: tokenizer no good than uninitialized BPE!"
+        "assertion fail: tokenizer no good than overinitialized BPE!"
 
     return {
-        'scores': {
-            'reference': ref_impl_scores,
-            'actual'   : tok_impl_scores
-        }
+        'scores'   : tok_impl_scores
     }

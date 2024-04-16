@@ -8,6 +8,8 @@ import subprocess
 import collections
 import unicodedata
 
+from collections import Counter
+
 import numpy
 import torch
 import pandas as pd
