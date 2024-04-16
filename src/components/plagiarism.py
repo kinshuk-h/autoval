@@ -102,7 +102,7 @@ class CheckSimilarityTask(Task):
                 })
 
             results = pandas.DataFrame.from_records(records).sort_values(by='Student')
-            results.to_csv(os.path.join(self.plag_results_dir, "moss_summary.csv"), index=True)
+            results.to_csv(os.path.join(self.plag_results_dir, "moss_summary.csv"), index=False)
         else:
             results = pandas.read_csv(os.path.join(self.plag_results_dir, "moss_summary.csv"))
 
