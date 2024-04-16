@@ -101,7 +101,7 @@ class CheckSimilarityTask(Task):
                     'Max. Similarity': '' if len(subdata) == 0 else max(subdata.values(), key=lambda x: int(x[:-1]))
                 })
 
-            results = pandas.DataFrame.from_records(records)
+            results = pandas.DataFrame.from_records(records).sort_values(by='Student')
             results.to_csv(os.path.join(self.plag_results_dir, "moss_summary.csv"), index=True)
         else:
             results = pandas.read_csv(os.path.join(self.plag_results_dir, "moss_summary.csv"))
