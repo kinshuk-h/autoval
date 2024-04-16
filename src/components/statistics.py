@@ -53,7 +53,7 @@ class AggregateStatisticsTask(Task):
         )
         self.print("Maximum marks awardable:", max_marks)
 
-        df_columns = { 'student': [] }
+        df_columns = { 'Student': [] }
         df_columns.update({
             f"{suite_name}.{test_name}": []
             for suite_name in self.marks_dist for test_name in self.marks_dist[suite_name]
@@ -63,7 +63,7 @@ class AggregateStatisticsTask(Task):
             pbar.set_description(student)
 
             student_data = io.Record.load(os.path.join(self.record_dir, f"{student}.json"))
-            df_columns['student'].append(student)
+            df_columns['Student'].append(student)
 
             for suite_name, test_marks_dist in self.marks_dist.items():
                 for test_name, test_max_marks in test_marks_dist.items():
@@ -71,8 +71,8 @@ class AggregateStatisticsTask(Task):
                     df_columns[f"{suite_name}.{test_name}"].append(test_max_marks if test_status else 0)
 
         marks_table = pandas.DataFrame(df_columns)
-        marks_table['total'] = marks_table.iloc[:, 1:].sum(axis=1)
-        marks_table.to_csv(os.path.join(self.stats_dir, "student_marks_data.csv"), index=False, header=True)
+        marks_table['Total'] = marks_table.iloc[:, 1:].sum(axis=1)
+        marks_table.sort_values(by=['Student']).to_csv(os.path.join(self.stats_dir, "student_marks_data.csv"), index=False, header=True)
 
     def elaborate_student_details(self):
         self.print("Generating student test reports ...", ("skip" if self.students is None else ""))
