@@ -62,7 +62,10 @@ class Context:
             seq_y = self.tgt_tokenizer.encode(seq_y, add_start=True, add_end=True)
             seq_y = torch.tensor(seq_y, device=self.model.device)
 
-            return self.model.log_probability(seq_x, seq_y)
+            try:
+                return self.model.log_probability(seq_x, seq_y)
+            except:
+                return self.model.log_probability(torch.stack([ seq_x ], dim=0), torch.stack([ seq_y ], dim=0))
 
 def test_attempted_bonus_decoding(context: Context):
     assert context.attempted_bonus, "Student did not attempt the bonus module"
