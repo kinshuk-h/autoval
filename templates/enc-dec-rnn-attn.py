@@ -11,7 +11,9 @@ import unicodedata
 import numpy
 import torch
 import pandas as pd
+import torch.nn as nn
 import tqdm.auto as tqdm
+import torch.optim as optim
 import torch.nn.functional as F
 from torch.nn.utils.rnn import pack_padded_sequence
 from torch.utils.data import DataLoader, TensorDataset
