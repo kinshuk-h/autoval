@@ -84,6 +84,10 @@ def test_decoding_correctness_beam(context: Context):
         decoding_params = { **getattr(context.module, 'decoding_params', {}) }
         decoding_params.update({ 'k': 1, 'length_penalty_alpha': 0 })
 
+        if 'max_length' in decoding_params:
+            decoding_params = { **decoding_params }
+            del decoding_params['max_length']
+
         greedy_scores = evaluator.evaluate(
             context.model, test_subset['Name'], test_subset['Translation'],
             max_length = 100
@@ -106,6 +110,10 @@ def test_decoding_correctness_probs(context: Context):
     assert context.attempted_bonus, "Student did not attempt the bonus module"
 
     decoding_params = getattr(context.module, 'decoding_params', {})
+
+    if 'max_length' in decoding_params:
+        decoding_params = { **decoding_params }
+        del decoding_params['max_length']
 
     if context.model is None: context.load_components()
 
@@ -138,6 +146,10 @@ def test_decoding_performance(context: Context):
     test_subset = context.test_data.sample(n=256, random_state=20240401)
 
     decoding_params = getattr(context.module, 'decoding_params', {})
+
+    if 'max_length' in decoding_params:
+        decoding_params = { **decoding_params }
+        del decoding_params['max_length']
 
     greedy_scores = evaluator.evaluate(
         context.model, test_subset['Name'], test_subset['Translation'],
