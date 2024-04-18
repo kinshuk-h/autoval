@@ -903,15 +903,17 @@ def test_tokenizer_quality(context: Context):
         "bleu"    : 0.55
     }
 
-    assert ref_impl_scores['bleu'] <= tok_impl_scores['bleu'], \
-        "assertion fail: tokenizer no good than overinitialized BPE!"
-    assert ref_impl_scores['accuracy'] <= tok_impl_scores['accuracy'], \
-        "assertion fail: tokenizer no good than overinitialized BPE!"
-    assert ref_impl_scores['cer'] >= tok_impl_scores['cer'], \
-        "assertion fail: tokenizer no good than overinitialized BPE!"
-    assert ref_impl_scores['ter'] >= tok_impl_scores['ter'], \
-        "assertion fail: tokenizer no good than overinitialized BPE!"
+    try:
+        assert ref_impl_scores['bleu'] <= tok_impl_scores['bleu'], \
+            "assertion fail: tokenizer no good than overinitialized BPE!"
+        assert ref_impl_scores['accuracy'] <= tok_impl_scores['accuracy'], \
+            "assertion fail: tokenizer no good than overinitialized BPE!"
+        assert ref_impl_scores['cer'] >= tok_impl_scores['cer'], \
+            "assertion fail: tokenizer no good than overinitialized BPE!"
+        assert ref_impl_scores['ter'] >= tok_impl_scores['ter'], \
+            "assertion fail: tokenizer no good than overinitialized BPE!"
 
-    return {
-        'scores'   : tok_impl_scores
-    }
+        return { 'scores': tok_impl_scores }
+    except AssertionError as exc:
+        setattr(exc, 'outputs', { 'scores': tok_impl_scores })
+        raise exc
