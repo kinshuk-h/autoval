@@ -696,11 +696,11 @@ def rnn_greedy_generate(model, seq_x, src_tokenizer, tgt_tokenizer, max_length):
         return tgt_tokenizer.decode(seq_y)
     pass
 
-def get_optimizer(model):
+def get_optimizer(model, src_tokenizer, tgt_tokenizer):
     optimizer = torch.optim.AdamW(model.parameters())
     return optimizer
 
-def get_criterion(model):
+def get_criterion(model, src_tokenizer, tgt_tokenizer):
     criterion = torch.nn.NLLLoss(reduction='none')
     return criterion
 

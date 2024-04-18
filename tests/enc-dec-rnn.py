@@ -148,8 +148,11 @@ class Context:
 
         model = self.module.RNNEncoderDecoderLM(**used_params)
 
-        criterion = self.module.get_criterion(model)
-        optimizer = torch.optim.AdamW(model.parameters()) if std else self.module.get_optimizer(model)
+        criterion = self.module.get_criterion(model, self.src_tokenizer, self.tgt_tokenizer)
+        if std:
+            optimizer = torch.optim.AdamW(model.parameters())
+        else:
+            optimizer = self.module.get_optimizer(model, self.src_tokenizer, self.tgt_tokenizer)
 
         trainer = self.module.RNNEncoderDecoderTrainer("rnn", model, criterion, optimizer)
 
@@ -199,6 +202,8 @@ class Context:
                     )
                     if len(logits_state) > 1:
                         logits, decoder_hidden_state = logits_state
+                        if isinstance(decoder_hidden_state, tuple) and decoder_hidden_state[1] is None:
+                            decoder_hidden_state = decoder_hidden_state[0]
                     else:
                         logits = logits_state
                     seq_y.append(logits[-1].cpu().argmax().item())
@@ -218,6 +223,8 @@ class Context:
                     )
                     if len(logits_state) > 1:
                         logits, decoder_hidden_state = logits_state
+                        if isinstance(decoder_hidden_state, tuple) and decoder_hidden_state[1] is None:
+                            decoder_hidden_state = decoder_hidden_state[0]
                     else:
                         logits = logits_state
                     seq_y.append(logits[:, -1].cpu().argmax().item())
@@ -463,12 +470,16 @@ def test_model_quality_fixed_hyperparams(context: Context):
         max_length = 100
     )
 
-    assert scores['bleu'] > 0.55
-    assert scores['accuracy'] > 0.15
-    assert scores['cer'] < 0.3
-    assert scores['ter'] < 0.45
+    try:
+        assert scores['bleu'] > 0.95
+        assert scores['accuracy'] > 0.15
+        assert scores['cer'] < 0.3
+        assert scores['ter'] < 0.45
 
-    return { 'trained': scores }
+        return { 'trained': scores }
+    except AssertionError as exc:
+        setattr(exc, 'outputs', { 'trained': scores })
+        raise exc
 
 def test_model_quality_best_hyperparams(context: Context):
 

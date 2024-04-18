@@ -902,12 +902,12 @@ class RNNEncoderDecoderTrainer(Trainer):
         return val_loss / len(validation_dataloader)
         # END CODE
 
-def get_optimizer(model):
+def get_optimizer(model, src_tokenizer, tgt_tokenizer):
     optimizer = torch.optim.AdamW(model.parameters())
     criterion = torch.nn.NLLLoss(reduction='none')
     return optimizer
 
-def get_criterion(model):
+def get_criterion(model, src_tokenizer, tgt_tokenizer):
     optimizer = torch.optim.AdamW(model.parameters())
     criterion = torch.nn.NLLLoss(reduction='none')
     return criterion

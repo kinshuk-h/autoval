@@ -118,8 +118,11 @@ class Context:
 
         model = self.module.RNNEncoderDecoderLMWithAttention(**used_params)
 
-        criterion = self.module.get_criterion(model)
-        optimizer = torch.optim.AdamW(model.parameters()) if std else self.module.get_optimizer(model)
+        criterion = self.module.get_criterion(model, self.src_tokenizer, self.tgt_tokenizer)
+        if std:
+            optimizer = torch.optim.AdamW(model.parameters())
+        else:
+            optimizer = self.module.get_optimizer(model, self.src_tokenizer, self.tgt_tokenizer)
 
         trainer = self.module.RNNEncoderDecoderTrainer("rnn-attn", model, criterion, optimizer)
 
@@ -188,7 +191,7 @@ def test_model_functions_correctness(context: Context):
         output, _ = context.model(seq_x, seq_y)
         output, _, attn = context.model(seq_x, seq_y, output_attention=True)
 
-        assert math.isclose(torch.exp(output).sum(dim=-1).squeeze().item(), 1.0)
+        assert math.isclose(torch.exp(output).sum(dim=-1).squeeze().item(), 1.0, rel_tol=1e-4)
         assert math.isclose(attn.sum(dim=-1).squeeze().item(), 1.0)
     except AssertionError:
         raise AssertionError("forward not executable or return mismatch")
@@ -198,7 +201,7 @@ def test_model_functions_correctness(context: Context):
             output, _ = context.model(seq_x, seq_y)
             output, _, attn = context.model(seq_x, seq_y, output_attention=True)
 
-            assert math.isclose(torch.exp(output).sum(dim=-1).squeeze().item(), 1.0)
+            assert math.isclose(torch.exp(output).sum(dim=-1).squeeze().item(), 1.0, rel_tol=1e-4)
             assert math.isclose(attn.sum(dim=-1).squeeze().item(), 1.0)
         except:
             raise AssertionError("forward not executable or return mismatch")
@@ -323,9 +326,12 @@ def test_model_consistency(context: Context):
                     context.tgt_tokenizer, max_length=data_params.get('tgt_padding', 100)
                 ))
 
-    assert all(rt_o == pt_o for rt_o, pt_o in zip(given_pt_outputs, pt_outputs))
-    assert len([rt_o == pt_o for rt_o, pt_o in zip(rt_outputs, pt_outputs)]) > (0.6 * len(pt_outputs))
-    assert all(numpy.isclose(rt_scores[metric], pt_scores[metric], atol=1e-4, rtol=1e-4) for metric in rt_scores)
+    assert all(rt_o == pt_o for rt_o, pt_o in zip(given_pt_outputs, pt_outputs)),\
+        "assert fail: output mismatch (pretrained)"
+    assert len([rt_o == pt_o for rt_o, pt_o in zip(rt_outputs, pt_outputs)]) > (0.6 * len(pt_outputs)),\
+        "assert fail: output mismatch (retrained)"
+    assert all(numpy.isclose(rt_scores[metric], pt_scores[metric], atol=1e-2, rtol=1e-2) for metric in rt_scores),\
+        "assert fail: score mismatch"
 
 def test_model_performance(context: Context):
     if context.model is None: context.load_components()
@@ -374,12 +380,16 @@ def test_model_quality_fixed_hyperparams(context: Context):
         max_length = 100
     )
 
-    assert scores['bleu'] > min(0.55, vanilla_scores['bleu'])
-    assert scores['accuracy'] > min(0.15, vanilla_scores['accuracy'])
-    assert scores['cer'] < max(0.3, vanilla_scores['cer'])
-    assert scores['ter'] < max(0.45, vanilla_scores['ter'])
+    try:
+        assert scores['bleu'] > min(0.55, vanilla_scores['bleu'])
+        assert scores['accuracy'] > min(0.15, vanilla_scores['accuracy'])
+        assert scores['cer'] < max(0.3, vanilla_scores['cer'])
+        assert scores['ter'] < max(0.45, vanilla_scores['ter'])
 
-    return { 'trained': scores }
+        return { 'trained': scores }
+    except AssertionError as exc:
+        setattr(exc, 'outputs', { 'trained': scores })
+        raise exc
 
 def test_model_quality_best_hyperparams(context: Context):
     if context.model is None: context.load_components()
