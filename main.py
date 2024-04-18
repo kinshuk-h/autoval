@@ -37,6 +37,8 @@ def make_parser():
                              help='directory for test modules to execute')
     test_parser.add_argument('-m', '--modules', nargs='*', default=None, required=False,
                              help="specific modules to test, defaulting to all")
+    test_parser.add_argument('-f', '--functions', nargs='*', default=None, required=False,
+                             help="specific functions to test, defaulting to all")
 
     stats_parser = subparsers.add_parser("stats", help="compiles test results and creates marks statistics")
 
@@ -82,8 +84,8 @@ def main():
 
     if action in ('test', 'all'):
         execute.TestExecutorTask(
-            args.data_dir, args.test_dir,
-            students_list=args.students, modules=args.modules,
+            args.data_dir, args.test_dir, students_list=args.students,
+            modules=args.modules, functions=args.functions,
             skip_existing=args.skip_existing and not args.invalidate_cache
         ).execute()
 

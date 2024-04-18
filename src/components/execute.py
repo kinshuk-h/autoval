@@ -2,9 +2,10 @@ import os
 import sys
 import glob
 import inspect
+import traceback
 import importlib.util
 
-import traceback
+import regex
 
 from .task import Task
 from ..utils import io, common
@@ -28,7 +29,7 @@ def load_module(module_name, source_file):
 class TestExecutorTask(Task):
     """ Sub-Task for executing tests against student codes. """
 
-    def __init__(self, data_dir, test_dir, students_list, modules, skip_existing=False) -> None:
+    def __init__(self, data_dir, test_dir, students_list, modules, functions, skip_existing=False) -> None:
         super().__init__("TEST", [
             self.load_test_modules,
             self.execute_tests
@@ -46,6 +47,22 @@ class TestExecutorTask(Task):
 
         self.tests = {}
         self.test_modules = modules
+        self.test_functions = [ regex.compile(rf"(?ui).*{pattern}.*") for pattern in functions ] if functions else None
+
+    def in_function_spec(self, name):
+        if self.test_functions is None: return True
+        for pattern in self.test_functions:
+            if pattern.search(name) is not None: return True
+        return False
+
+    def rank_wise_order(self, functions):
+        if self.test_functions is None: return functions
+        idx, rank = 0, {}
+        for pattern in self.test_functions:
+            for fx in functions:
+                if pattern.search(fx.__name__[5:]) is not None:
+                    rank[fx.__name__[5:]] = idx
+        return sorted(functions, key=lambda fx: rank[fx.__name__[5:]])
 
     def load_test_modules(self):
         self.print("Loading test modules from", self.test_dir, "...", end=' ', flush=True)
@@ -53,20 +70,26 @@ class TestExecutorTask(Task):
         tests = glob.glob(os.path.join(self.test_dir, "*.py"))
 
         for test_path in tests:
-            test_name = os.path.splitext(os.path.basename(test_path))[0]
-            if test_name == 'common': continue
-            if self.test_modules is not None and test_name not in self.test_modules: continue
-            test_module = load_module("tests." + test_name, test_path)
-            self.tests[test_name] = {
+            suite_name = os.path.splitext(os.path.basename(test_path))[0]
+            if suite_name == 'common': continue
+            if self.test_modules is not None and suite_name not in self.test_modules: continue
+            test_module = load_module("tests." + suite_name, test_path)
+            self.tests[suite_name] = {
                 'module' : test_module,
                 'context': test_module.Context,
-                'tests'  : [
+                'tests'  : self.rank_wise_order([
                     function for name, function in inspect.getmembers(test_module, inspect.isfunction)
-                    if name.startswith('test_')
-                ]
+                    if name.startswith('test_') and self.in_function_spec(name)
+                ])
             }
 
         print("done")
+
+        self.print("Discovered test suites:")
+        for suite_name, test in self.tests.items():
+            self.print(" TEST SUITE:", suite_name)
+            for fx in test['tests']:
+                self.print("    ", "TEST:", fx.__name__[5:])
 
     def execute_tests(self):
         self.print("Executing test modules using student implementations ...")
@@ -117,6 +140,8 @@ class TestExecutorTask(Task):
                                     for line_set in traceback.format_exception(exc):
                                         for line in line_set.split('\n'): self.print("   ", line)
                                 net_result[fn_name] = { 'status': False, 'reason': str(exc) }
+                                if output := getattr(exc, 'outputs') is not None:
+                                    if isinstance(output, dict): net_outputs.update(output)
                             sys.modules['__main__'] = old_main_module
 
                     student_data.deepset(f"outputs.{test_name}", net_outputs)
