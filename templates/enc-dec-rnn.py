@@ -161,11 +161,11 @@ def rnn_greedy_generate(model, seq_x, src_tokenizer, tgt_tokenizer, max_length):
     # >>> {segment:enc-dec-rnn.greedy_generate} <<<
     pass
 
-def get_optimizer(model):
+def get_optimizer(model, src_tokenizer, tgt_tokenizer):
     # >>> {segment:rnn-enc-dec.train} <<<
     return optimizer
 
-def get_criterion(model):
+def get_criterion(model, src_tokenizer, tgt_tokenizer):
     # >>> {segment:rnn-enc-dec.train} <<<
     return criterion
 

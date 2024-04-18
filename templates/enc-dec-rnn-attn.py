@@ -150,11 +150,11 @@ class Trainer:
 
 # >>> {block:rnn-enc-dec-trainer} <<<
 
-def get_optimizer(model):
+def get_optimizer(model, src_tokenizer, tgt_tokenizer):
     # >>> {segment:rnn-enc-dec-attn.train} <<<
     return optimizer
 
-def get_criterion(model):
+def get_criterion(model, src_tokenizer, tgt_tokenizer):
     # >>> {segment:rnn-enc-dec-attn.train} <<<
     return criterion
 
