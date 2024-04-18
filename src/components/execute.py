@@ -140,7 +140,7 @@ class TestExecutorTask(Task):
                                     for line_set in traceback.format_exception(exc):
                                         for line in line_set.split('\n'): self.print("   ", line)
                                 net_result[fn_name] = { 'status': False, 'reason': str(exc) }
-                                if output := getattr(exc, 'outputs') is not None:
+                                if output := getattr(exc, 'outputs', None) is not None:
                                     if isinstance(output, dict): net_outputs.update(output)
                             sys.modules['__main__'] = old_main_module
 
