@@ -7,7 +7,7 @@ import regex
 from . import task
 from ..utils import io, common
 
-VAR_PATTERN = r"(?umi)^\s*(?P<statement>{0}\s*=\s*(?P<value>{1}))"
+VAR_PATTERN = r"(?umi)^\s*(?P<statement>{0}\s*=\s*(?P<value>(?:{1}|None)))"
 FORMAT = {
     'int' : r"\d+",
     'bool': r"(?:True|False)",
