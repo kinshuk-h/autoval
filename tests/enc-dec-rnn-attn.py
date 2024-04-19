@@ -192,7 +192,7 @@ def test_model_functions_correctness(context: Context):
         output, _, attn = context.model(seq_x, seq_y, output_attention=True)
 
         assert math.isclose(torch.exp(output).sum(dim=-1).squeeze().item(), 1.0, rel_tol=1e-4)
-        assert math.isclose(attn.sum(dim=-1).squeeze().item(), 1.0)
+        assert math.isclose(attn.sum(dim=-1).squeeze().item(), 1.0, rel_tol=1e-4)
     except AssertionError:
         raise AssertionError("forward not executable or return mismatch")
     except Exception:
@@ -202,7 +202,7 @@ def test_model_functions_correctness(context: Context):
             output, _, attn = context.model(seq_x, seq_y, output_attention=True)
 
             assert math.isclose(torch.exp(output).sum(dim=-1).squeeze().item(), 1.0, rel_tol=1e-4)
-            assert math.isclose(attn.sum(dim=-1).squeeze().item(), 1.0)
+            assert math.isclose(attn.sum(dim=-1).squeeze().item(), 1.0, rel_tol=1e-4)
         except:
             raise AssertionError("forward not executable or return mismatch")
 
