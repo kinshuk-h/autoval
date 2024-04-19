@@ -151,9 +151,6 @@ class Context:
             if root is None or src_file is None or tgt_file is None:
                 raise ValueError("Tokenizer file(s) not found")
 
-            if root is None or mdl_file is None:
-                raise ValueError("Model file not found")
-
             self.src_tokenizer, self.tgt_tokenizer = load_tokenizers(
                 os.path.join(root, "src-tokenizer"),
                 os.path.join(root, "tgt-tokenizer"),
@@ -161,6 +158,9 @@ class Context:
             )
 
         if model and self.model is None:
+            if root is None or mdl_file is None:
+                raise ValueError("Model file not found")
+
             try:
                 self.model = load_model(os.path.join(root, "rnn.enc-dec.attn"), 'cuda:0')
             except:
