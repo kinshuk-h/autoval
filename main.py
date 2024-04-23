@@ -67,7 +67,7 @@ def main():
 
     if action in ('extract', 'all'):
         extract.ExtractTask(
-            args.data_dir,
+            args.data_dir, args.students,
             assignment    = context["assignment"],
             dir_structure = context['assignment_files'],
             skip_existing = args.skip_existing

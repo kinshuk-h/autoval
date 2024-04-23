@@ -19,7 +19,7 @@ def make_tree(paths):
     return tree
 
 class ExtractTask(task.Task):
-    def __init__(self, root_dir, dir_structure, assignment=3, skip_existing=False) -> None:
+    def __init__(self, root_dir, students, dir_structure, assignment=3, skip_existing=False) -> None:
         super().__init__("EXTRACT", [
             self.extract_raw_sources,
             self.unpack_and_prepare_records
@@ -38,6 +38,8 @@ class ExtractTask(task.Task):
         self.dir_structure = self.compile_dir_structure(dir_structure)
 
         self.skip_existing = skip_existing
+
+        self.students = students
 
     @staticmethod
     def compile_dir_structure(dir_structure: dict[str, str|list[str]]):
@@ -99,7 +101,7 @@ class ExtractTask(task.Task):
         return selected_paths, selected_patterns, self.decompile_dir_structure(patterns)
 
     def unpack_and_prepare_records(self):
-        students = os.listdir(self.raw_dir)
+        students = self.students or os.listdir(self.raw_dir)
 
         self.print("Unpacking student code archives and preparing data records ...")
         for student in (pbar := tqdm.tqdm(students)):
