@@ -69,9 +69,10 @@ class CheckSimilarityTask(Task):
         args = [ "perl", "moss", "-l", "python", "-b", self.base_file ]
 
         if not self.skip_existing or not os.path.exists(os.path.join(self.plag_results_dir, "moss.json")):
-            for student in self.students_list:
+            for student in common.tqdm(self.students_list):
                 student_data = io.Record.load(os.path.join(self.record_dir, f"{student}.json"))
                 if (file := student_data.deepget(("meta", "code", base_name))) is not None:
+                    subprocess.run([ "python3", "-m", "autopep8", "--in-place", "--aggressive", "--aggressive", file ])
                     args.append(file)
 
             result = subprocess.run(args, capture_output=True)
