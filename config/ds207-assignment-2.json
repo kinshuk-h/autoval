@@ -1,0 +1,11 @@
+{
+  "assignment": 2,
+  "assignment_files": {
+    "assignment1.py": "[\\w\\s]+(?:[-_](?:\\d{5}))?(?:[-_]assignm(?:en?|ne)t[_-]?2)?(?:.*)\\.py"
+  },
+  "assignment_code_file": "assignment2.py",
+  "assignment_variables": {
+  },
+  "marks_distribution": {
+  }
+}
