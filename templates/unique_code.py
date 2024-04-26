@@ -86,3 +86,4 @@ class RNNEncoderDecoderLMWithAttention:
 
 def rnn_greedy_generate(model, seq_x, src_tokenizer, tgt_tokenizer, max_length):
     # >>> {segment:enc-dec-rnn.greedy_generate} <<<
+    pass
