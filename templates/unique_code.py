@@ -83,3 +83,6 @@ class RNNEncoderDecoderLMWithAttention:
     def forward(self, inputs, decoder_inputs=None, decoder_hidden_state=None, output_attention=False):
         # >>> {segment:enc-dec-rnn-attn.forward} <<<
         pass
+
+def rnn_greedy_generate(model, seq_x, src_tokenizer, tgt_tokenizer, max_length):
+    # >>> {segment:enc-dec-rnn.greedy_generate} <<<
